@@ -2,7 +2,7 @@ from __future__ import annotations
 import re
 import typing
 from itertools import product
-from typing import Any, Callable
+from typing import Any, Callable, Union, List
 
 import sympy
 from sympy import Mul, Add, Pow, Rational, log, exp, sqrt, cos, sin, tan, asin, acos, acot, asec, acsc, sinh, cosh, tanh, asinh, \
@@ -595,7 +595,7 @@ class MathematicaParser:
     _enclosure_close = [")", "]", "]]", "}"]
 
     @classmethod
-    def _get_neg(cls, x):
+    def _get_neg(cls, x: str) -> Union[str, List[str]]:
         return f"-{x}" if isinstance(x, str) and re.match(MathematicaParser._number, x) else ["Times", "-1", x]
 
     @classmethod

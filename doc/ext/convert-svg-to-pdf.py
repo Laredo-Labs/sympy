@@ -64,9 +64,10 @@ class Converter(ImageConverter):
     def command_runner(self, chrome: str | None, _to: str, temp_name: str) -> int:
         if not chrome:
             return 1
-        command = f'{chrome} --headless --disable-gpu --disable-software-rasterizer --print-to-pdf={_to} {temp_name}'
-        logger.error(command)
-        return os.system(command)
+        command = [chrome, '--headless', '--disable-gpu', '--disable-software-rasterizer', f'--print-to-pdf={_to}', temp_name]
+        logger.error(' '.join(command))
+        result = subprocess.run(command, capture_output=True)
+        return result.returncode
 
     def convert(self, _from: str, _to: str) -> bool:
         """Converts the image from SVG to PDF using chrome."""

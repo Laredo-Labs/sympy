@@ -186,20 +186,13 @@ class CompilerRunner:
         env = os.environ.copy()
         env['PWD'] = self.cwd
 
-        # NOTE: intel compilers seems to need shell=True
-        p = subprocess.Popen(' '.join(self.cmd()),
-                             shell=True,
-                             cwd=self.cwd,
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT,
-                             env=env)
-        comm = p.communicate()
+        cmd = self.cmd()
+        result = subprocess.run(cmd, cwd=self.cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
         try:
-            self.cmd_outerr = comm[0].decode('utf-8')
+            self.cmd_outerr = result.stdout.decode('utf-8')
         except UnicodeDecodeError:
-            self.cmd_outerr = comm[0].decode('iso-8859-1')  # win32
-        self.cmd_returncode = p.returncode
+            self.cmd_outerr = result.stdout.decode('iso-8859-1')  # win32
+        self.cmd_returncode = result.returncode
 
         # Error handling
         if self.cmd_returncode != 0:

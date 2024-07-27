@@ -122,8 +122,7 @@ def try_run(commands):
         return False
     with open(os.devnull, 'w') as null:
         for command in commands:
-            retcode = subprocess.call(command, stdout=null, shell=True,
-                    stderr=subprocess.STDOUT)
+            retcode = subprocess.run(command, stdout=null, stderr=subprocess.STDOUT, shell=False).returncode
             if retcode != 0:
                 return False
     return True

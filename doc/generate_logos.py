@@ -147,15 +147,12 @@ def convert_to_png(fn_source, output_dir, sizes):
     svgs = list(versions)
     svgs.insert(0, '')
 
-    cmd = "rsvg-convert"
-    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
-    p.communicate()
-    if p.returncode == 127:
+    cmd = ["rsvg-convert"]
+    result = subprocess.run(cmd, capture_output=True)
+    if result.returncode == 127:
         logging.error(
-            "%s: command not found. Install librsvg" % cmd)
-        sys.exit(p.returncode)
+            "%s: command not found. Install librsvg" % cmd[0])
+        sys.exit(result.returncode)
 
     for ver in svgs:
         if ver == '':
@@ -186,17 +183,15 @@ def convert_to_png(fn_source, output_dir, sizes):
                                                                 fn_out,
                                                                 size, size)
 
-            p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
-            p.communicate()
-            if p.returncode != 0:
-                logging.error("Return code is not 0: Command: %s" % cmd)
-                logging.error("return code: %s" % p.returncode)
-                sys.exit(p.returncode)
+            cmd = ["rsvg-convert", fn_svg, "-f", "png", "-o", fn_out, "-h", str(size), "-w", str(size)]
+            result = subprocess.run(cmd, capture_output=True)
+            if result.returncode != 0:
+                logging.error("Return code is not 0: Command: %s" % ' '.join(cmd))
+                logging.error("return code: %s" % result.returncode)
+                sys.exit(result.returncode)
             else:
-                logging.debug("command: %s" % cmd)
-                logging.debug("return code: %s" % p.returncode)
+                logging.debug("command: %s" % ' '.join(cmd))
+                logging.debug("return code: %s" % result.returncode)
 
 
 def convert_to_ico(fn_source, output_dir, sizes):
@@ -208,16 +203,13 @@ def convert_to_ico(fn_source, output_dir, sizes):
     svgs.insert(0, '')
 
     if system()[0:3].lower() == "win":
-        cmd = "magick"
+        cmd = ["magick"]
     else:
-        cmd = "convert"
-    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
-    p.communicate()
-    if p.returncode == 127:
-        logging.error("%s: command not found. Install imagemagick" % cmd)
-        sys.exit(p.returncode)
+        cmd = ["convert"]
+    result = subprocess.run(cmd, capture_output=True)
+    if result.returncode == 127:
+        logging.error("%s: command not found. Install imagemagick" % cmd[0])
+        sys.exit(result.returncode)
 
     if system()[0:3].lower() == "win":
         os.chdir(default_output_dir)
@@ -243,18 +235,15 @@ def convert_to_ico(fn_source, output_dir, sizes):
         if system()[0:3].lower() != "win":
             fn_out = os.path.join(output_dir, fn_out)
 
-        cmd = "{} {} {}".format(cmd, " ".join(pngs), fn_out)
-        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
-        p.communicate()
-        if p.returncode != 0:
-            logging.error("Return code is not 0: Command: %s" % cmd)
-            logging.error("return code: %s" % p.returncode)
-            sys.exit(p.returncode)
+        cmd = cmd + pngs + [fn_out]
+        result = subprocess.run(cmd, capture_output=True)
+        if result.returncode != 0:
+            logging.error("Return code is not 0: Command: %s" % ' '.join(cmd))
+            logging.error("return code: %s" % result.returncode)
+            sys.exit(result.returncode)
         else:
-            logging.debug("command: %s" % cmd)
-            logging.debug("return code: %s" % p.returncode)
+            logging.debug("command: %s" % ' '.join(cmd))
+            logging.debug("return code: %s" % result.returncode)
 
 
 def versionkey_to_boolean_tuple(ver):
